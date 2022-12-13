@@ -2,25 +2,29 @@ version: '3.2'
 
 services:
 
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:8.5.3
-    container_name: filebeat
+  auditbeat:
+    image: docker.elastic.co/beats/auditbeat:8.5.3
+    container_name: auditbeat
     user: root
     networks:
       - logging-approach
     environment:
       - strict.perms=false
+    pid: host
+    cap_add:
+      - AUDIT_CONTROL
+      - AUDIT_READ
     volumes:
-      - './auditbeat.yml:/usr/share/filebeat/auditbeat.yml:ro'
-      - './data:/usr/share/filebeat/data:rw'
-      - './var/log/busybox:/usr/share/services/busybox'
-      #- '/home/ubuntu/.pm2/logs:/usr/share/services/node'
-    command: filebeat -e
+      - './auditbeat.yml:/usr/share/auditbeat/auditbeat.yml:ro'
+      - './data:/usr/share/auditbeat/data:rw'
+      - './var/log/busybox:/usr/share/auditbeat/logs/services/busybox/'
+    command: ["auditbeat", "-e" ]
     logging:
       driver: "json-file"
       options:
         max-file: "5"
         max-size: "10m"
+
   busybox:
     image: busybox
     networks:
