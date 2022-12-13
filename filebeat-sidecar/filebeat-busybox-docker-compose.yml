@@ -31,12 +31,18 @@ services:
       - >
         mkdir -p /var/log/
         i=0;
+        rotate=0;
         while true;
         do
-          echo "$i: $(date) busybox app log" >> /var/log/1.log;
-          echo "$(date) INFO $i" >> /var/log/1.log;
+          echo "INFO log file $((i)) rotated for busybox app log"
+          while [ "$((rotate))" -lt "500" ]
+          do
+            echo "$(date) INFO $i busybox app log" >> /var/log/$((i)).log;
+            rotate=$((rotate + 1))
+            sleep 0.01;
+          done
           i=$((i+1));
-          sleep 1;
+          rotate=0;
         done
     volumes:
       - './var/log/busybox:/var/log'
